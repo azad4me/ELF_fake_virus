@@ -10,17 +10,110 @@
 
 long what_is_the_file_length(char *file_name)
 {
+	long length_of_file=0;
+	FILE *pFile=fopen(file_name,"rb");
 
+	if(!pFile)
+	{
+#ifdef DEBUGMODE
+		perror("Error when creating file pointer.");
+#endif
+		return (-1);
+	}
+	else
+	{
+		fseek(pFile,0, SEEK_END);
+		length_of_file=ftell(pFile);
+		fseek(pFile,0,SEEK_SET);
+	}
+
+	fclose(pFile);
+	pFile=NULL;
+
+	return length_of_file;
 }
 
 int verify_is_elf(char *file_name)
 {
+	/* ==============================================================================================================================================================================
+	 * A common misconception is that ELF files are just for binaries or executables. But they can be used for partial pieces (object code).
+	 * Another example is shared libraries or even core dumps (those core or a.out files). The ELF specification is also used on Linux for the kernel itself and Linux kernel modules.
+	 * ==============================================================================================================================================================================
+	 */
+
+	/* =================================================================================================================
+	 * The first 4 hexadecimal parts define that this is an ELF file (0x45=E,0x4c=L,0x46=F), prefixed with the 0x7f value.
+	 * So, the order in the ELF Header should be 0x7f, 0x45, 0x4c, 0x46
+	 * ==================================================================================================================
+	 */
+
+	FILE *pFile=fopen(file_name,"rb"); // "rb" parameter goes similarly like "r", but "rb" is used for binary files as it does not provide "translation" as per the OS particulars for the end of line character "\n"
+
+	if(!pFile)
+	{
+#ifdef DEBUGMODE
+		perror("Error when creating the file pointer.");
+#endif
+		return (-1);
+	}
+	else
+	{
+		char my_buffer[4];
+
+		int i;
+		for(i=0;i<4;i++)
+		{
+			my_buffer[i]=fgetc(pFile);
+		}
+
+		if(my_buffer[0]==0x7f && my_buffer[1]==0x45 && my_buffer[2]==0x4c && my_buffer[3]==0x46)
+		{
+			return true;
+		}
+	}
+
+	fclose(pFile);
+	pFile=NULL;
 
 }
 
-int verify_is_infected(char *file_name, char *virus_signature,int length_of_signature )
+int verify_if_is_infected(char *file_name, char *virus_signature,int length_of_signature )
 {
+	char my_buffer[length_of_signature+1]; // +1 will be added for the '\0' so to say null ending character for the string
 
+	FILE *pFile=fopen(file_name,"rb");
+
+	if(!pFile)
+	{
+#ifdef DEBUGMODE
+		perror("Error when creating file pointer.");
+#endif
+		return (-1);
+	}
+	else
+	{
+		fseek(pFile, (length_of_signature * -1),SEEK_END);
+
+		int i;
+		for(i=0;i<length_of_signature;i++)
+		{
+			my_buffer[i]=fgetc(pFile);
+		}
+
+		my_buffer[length_of_signature]='\0';
+
+		if(!strcmp(my_buffer,virus_signature))
+		{
+			return true; // 'true'(=1) and 'false'(=0) given to you by the power of #include <stdbool.h> :)
+		}
+		else
+		{
+			return false;
+		}
+	}
+
+	fclose(pFile);
+	pFile=NULL;
 }
 
 int verify_is_original_file(char * file_name)
