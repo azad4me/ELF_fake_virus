@@ -11,5 +11,6 @@
 #define SRC_MACRO_DEFINITIONS_H_
 
 #define DEBUGMODE	1
+#define VERBOSEMODE 1
 
 #endif /* SRC_MACRO_DEFINITIONS_H_ */
