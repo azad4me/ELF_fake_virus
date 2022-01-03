@@ -3,4 +3,4 @@ This a learning project aimed for training and building situation awareness abou
 
 ## A study example
 * A basic virus sample (learning purposes only) aimed for Linux machines (where ELF file signatures matter). 
-* The virus copies itself to all binary files from a specified directory and avoid reinfecting itself.
+* The virus copies itself to all binary files from a specified directory and avoids reinfecting itself.
