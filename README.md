@@ -1,5 +1,5 @@
 # Ethical hacking. Building Applications
-This a learning project aimed for training and building situation awareness about vulnerabilities of systems against viruses and malware. 
+This a learning project aimed for training on the possible behaviour of C-developed viruses. 
 
 ## A study example
 * A basic virus sample (learning purposes, do not shoot me!) aimed for Linux machines (where ELF file signatures matter). 
