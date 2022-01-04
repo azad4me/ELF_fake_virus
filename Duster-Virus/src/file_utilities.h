@@ -19,6 +19,7 @@
 #include <sys/time.h> //The <sys/stat.h> header shall define the structure of the data returned by the fstat(), lstat(), and stat() functions.
 #include <stdbool.h>
 #include <dirent.h>
+#include "macro_definitions.h"
 
 
 long what_is_the_file_length(char *file_name);
@@ -29,13 +30,13 @@ long what_is_the_file_length(char *file_name);
 int verify_is_elf(char *file_name);
 
 int verify_if_is_infected(char *file_name, char *virus_signature,int length_of_signature);
-int verify_is_original_file(char * file_name, char *virus_file_name); // do not infect oneself, where is the pleasure... :)
-char *search_for_target(char *path_to_target_directory, char *virus_file_name, char *virus_signature, long length_of_signature);
+int verify_is_original_file(char *file_name,char *virus_file_name); // do not infect oneself, where is the pleasure... :)
+char *search_for_target(char *path_to_target_directory, char *virus_file_name,  char *virus_signature, long length_of_signature);
 void execute_virus_mission();
 void stamp_the_infected_file(char *file_name, char *virus_signature);
 
 int go_infect_the_target_file(char *target_file_name,char *virus_binary_file_name, long size_of_virus);
-void extract_action_from_virus(char *binary_virus_filename, char *temporary_file_name, long size_of_virus, long length_of_signature);
+void extract_action_from_virus(char *binary_file_name, char *temporary_file_name, long size_of_virus, long length_of_signature);
 void execute_action(char *file_name, char *argv[], char *temporary_file_name, long size_of_virus, long length_of_signature);
 
 #endif /* SRC_FILE_UTILITIES_H_ */

