@@ -1,6 +1,6 @@
-# Ethical hacking. Building Applications
+# Ethical hacking. Building Applications for security training
 This a learning project aimed for training on the possible behaviour of C-developed viruses. 
 
-## A study example
-* A basic virus sample (learning purposes, do not shoot me!) aimed for Linux machines (where ELF file signatures matter). 
+## A study example for Linux machines
+* A basic virus sample  aimed for Linux machines using ELF (Executable and Linkable Format) concepts
 * The virus copies itself to all binary files from a specified directory and avoids reinfecting itself.
